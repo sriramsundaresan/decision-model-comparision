@@ -96,7 +96,7 @@ async function poll(id) {
       const job = await api(`/api/jobs/${encodeURIComponent(id)}`);
       if (!polling) break;
       if (!render(job)) {
-        sessionStorage.removeItem("banking-job");
+        sessionStorage.removeItem("evaluation-job");
         activeJob = null;
         break;
       }
@@ -105,7 +105,7 @@ async function poll(id) {
         $("downloads").hidden = false;
         $("download-json").href = `/api/jobs/${encodeURIComponent(id)}/download?format=json`;
         $("download-html").href = `/api/jobs/${encodeURIComponent(id)}/download?format=html`;
-        sessionStorage.removeItem("banking-job");
+        sessionStorage.removeItem("evaluation-job");
         activeJob = null;
         break;
       }
@@ -113,7 +113,7 @@ async function poll(id) {
     }
   } catch (error) {
     if (error.status === 404) {
-      sessionStorage.removeItem("banking-job");
+      sessionStorage.removeItem("evaluation-job");
       activeJob = null;
       notice(error.message, true);
     } else {
@@ -127,7 +127,7 @@ async function poll(id) {
 async function initialize() {
   await api("/api/config");
   $("workspace").hidden = false;
-  const saved = sessionStorage.getItem("banking-job");
+  const saved = sessionStorage.getItem("evaluation-job");
   if (saved) { notice("Reconnecting to your evaluation."); void poll(saved); }
 }
 $("upload-form").addEventListener("submit", async (event) => {
@@ -143,7 +143,7 @@ $("upload-form").addEventListener("submit", async (event) => {
       method: "POST", body: file,
       headers: { "Content-Type": xlsxType, "X-Synthetic-Data": "confirmed" },
     });
-    sessionStorage.setItem("banking-job", result.id);
+    sessionStorage.setItem("evaluation-job", result.id);
     notice("Evaluating...");
     await poll(result.id);
   } catch (error) { notice(error.message, true); }

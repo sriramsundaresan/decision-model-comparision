@@ -5,6 +5,7 @@ import pytest
 from pydantic import ValidationError
 
 from intent_evaluator import (
+    INTENTS,
     MODE,
     QUESTION,
     ROOT,
@@ -25,9 +26,9 @@ from intent_evaluator import (
 def case(identifier="X", *, classifier_correct=True):
     return EvaluationCase(
         id=identifier,
-        message="Cancel my scheduled transfer.",
-        predicted_intent="cancel_transfer" if classifier_correct else "transfer_money",
-        expected_intent="cancel_transfer",
+        message="Cancel my scheduled request.",
+        predicted_intent="cancel_request" if classifier_correct else "create_request",
+        expected_intent="cancel_request",
     )
 
 
@@ -46,11 +47,12 @@ def score(test_case, probability):
         return evaluate(client, "https://test.invalid", "deployment", test_case, "jev")
 
 
-def test_template_balances_correct_and_incorrect_classifier_predictions():
-    cases = load_cases(ROOT / "banking_evaluation_cases.csv")
+def test_examples_balance_correct_and_incorrect_classifier_predictions():
+    cases = load_cases(ROOT / "evaluation_cases.csv")
     assert len(cases) == 30
     assert len({c.id for c in cases}) == 30
     assert sum(c.classifier_is_correct for c in cases) == 15
+    assert {c.expected_intent for c in cases} == set(INTENTS)
     for correct, incorrect in zip(cases[::2], cases[1::2], strict=True):
         assert correct.message == incorrect.message
         assert correct.classifier_is_correct and not incorrect.classifier_is_correct
@@ -186,7 +188,7 @@ def test_report_restores_metrics_with_rounded_noul_and_full_precision_export():
         "summary": {"jev": summarize([test_case], [row], "jev")},
     }
     rendered = render_report(report)
-    assert "banking" not in rendered.lower()
+    assert "cancel_request" in rendered
     assert str(probability) in rendered
     assert ">1.00<br>Intent judged correct" in rendered
     assert "Does not match reference" in rendered

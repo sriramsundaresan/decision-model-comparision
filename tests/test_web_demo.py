@@ -166,7 +166,7 @@ def test_template_contains_only_headers():
 def test_template_round_trip_after_adding_case():
     book = load_workbook(io.BytesIO(excel_template()))
     try:
-        book.active.append(["X", "Show my balance", "check_balance", "check_balance"])
+        book.active.append(["X", "Explain how this works", "get_information", "get_information"])
         stream = io.BytesIO()
         book.save(stream)
     finally:
@@ -267,7 +267,7 @@ def test_expired_and_invalid_sessions_are_replaced_without_password(web):
 def test_customer_page_is_upload_focused_and_all_script_elements_exist(web):
     page = web.client.get("/").text
     assert "Upload and evaluate" in page
-    assert "banking" not in page.lower()
+    assert "Decision Model Comparison" in page
     assert "Prepare your test cases" not in page
     assert 'id="question"' not in page
     assert 'id="dataset-summary"' not in page
@@ -291,6 +291,9 @@ def test_customer_page_is_upload_focused_and_all_script_elements_exist(web):
     assert "/api/login" not in script
     assert "/api/logout" not in script
     assert 'await api("/api/config")' in script
+    assert 'sessionStorage.getItem("evaluation-job")' in script
+    assert 'sessionStorage.setItem("evaluation-job", result.id)' in script
+    assert script.count('sessionStorage.removeItem("evaluation-job")') == 3
 
 
 def test_status_and_json_restore_metrics_without_rounding_model_values(web):
@@ -298,9 +301,9 @@ def test_status_and_json_restore_metrics_without_rounding_model_values(web):
     owner = web.app.state.store.session_owner(web.client.cookies.get("demo_session"))
     test_case = EvaluationCase(
         id="P",
-        message="Cancel the transfer",
-        predicted_intent="cancel_transfer",
-        expected_intent="cancel_transfer",
+        message="Cancel the request",
+        predicted_intent="cancel_request",
+        expected_intent="cancel_request",
     )
     report = report_for([test_case])
     probability = 0.9975273749375825
@@ -325,7 +328,7 @@ def test_status_and_json_restore_metrics_without_rounding_model_values(web):
     assert status == download
     assert status["results"][0]["answers"]["intent_is_correct"]["noul"] == probability
     assert "summary" in status
-    assert status["cases"][0]["expected_intent"] == "cancel_transfer"
+    assert status["cases"][0]["expected_intent"] == "cancel_request"
     assert status["results"][0]["judged_correct"] is True
     html = web.client.get(f"/api/jobs/{identifier}/download?format=html").text
     assert str(probability) in html
@@ -457,7 +460,7 @@ def test_unsupported_report_can_be_exported_as_json_only(web):
         "providers": ["jev"],
         "question": {},
         "dataset_sha256": "old",
-        "cases": [{"id": "OLD", "message": "Show my balance", "expected_intent": "check_balance"}],
+        "cases": [{"id": "OLD", "message": "Explain this", "expected_intent": "get_information"}],
         "results": [],
         "summary": {},
     }

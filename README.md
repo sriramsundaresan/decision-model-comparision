@@ -7,13 +7,13 @@ description: Compare Microsoft-Decision-1 and Jev judgments of supplied classifi
 
 This web demo compares Microsoft-Decision-1 and Jev on the
 same Excel test cases. Each model judges whether a supplied classifier intent is
-correct. Neither model generates a replacement intent or executes a transaction.
+correct. Neither model generates a replacement intent or executes an action.
 
 Only synthetic data is permitted. Messages and classifier predictions are sent
 to Microsoft Azure and TypeSafe AI. Human reference labels and case IDs stay
 within the application.
 
-This is a temporary, single-instance demonstration, not a production banking
+This is a temporary, single-instance demonstration, not a production
 service or an independently validated benchmark.
 
 ## Source files
@@ -24,7 +24,7 @@ service or an independently validated benchmark.
   question, response validation, transport, metrics, and HTML report
 * [comparison.html](comparison.html), [comparison.css](comparison.css), and
   [comparison.js](comparison.js): customer upload and results interface
-* [banking_evaluation_cases.csv](banking_evaluation_cases.csv): synthetic examples
+* [evaluation_cases.csv](evaluation_cases.csv): domain-neutral synthetic examples
   used for offline development tests, not included in the downloadable workbook
 * [tests](tests): offline evaluator and web regression tests
 * [pyproject.toml](pyproject.toml), [uv.lock](uv.lock), and
@@ -126,17 +126,21 @@ App Service and reload the page.
 the supplied classifier output; `expected_intent` is the human-reviewed reference.
 Both intent columns must use one of these labels:
 
-* `transfer_money`
-* `pay_bill`
-* `check_transaction_status`
-* `dispute_transaction`
-* `cancel_transfer`
-* `view_transaction_history`
-* `check_balance`
+* `create_request`
+* `update_request`
+* `check_request_status`
+* `report_issue`
+* `cancel_request`
+* `view_history`
+* `get_information`
 * `other`
 * `needs_clarification`
 
 The precise definitions are in [intent_evaluator.py](intent_evaluator.py).
+These domain-neutral labels replace the previous domain-specific labels.
+Update existing workbooks to the labels above before uploading them.
+The browser now saves active runs under `evaluation-job`; previously saved runs
+will not reconnect automatically after this update.
 Uploads allow 1-100 cases, unique IDs of up to 50 characters, messages of up to
 1,000 characters, and a file size of up to 256 KiB. Empty cells, unknown labels,
 formulas, macros, external workbook links, and oversized expanded archives are
@@ -175,7 +179,7 @@ returned as model judgments.
 
 Only one evaluation runs globally at a time. The persistent quota is 1,000 rows
 per UTC day, allowing up to 2,000 model calls. Each row reserves quota before
-inference; failures and restarts do not refund it. Calls alternate provider order,
+inference; failures and restarts do not restore it. Calls alternate provider order,
 run sequentially, have a 30-second HTTP timeout, and are not retried automatically.
 Authorization and rate-limit failures stop the run. Errors and partial results
 are explicit, with no substitute probabilities.
@@ -213,7 +217,6 @@ intent_evaluator.py
 comparison.html
 comparison.css
 comparison.js
-banking_evaluation_cases.csv
 requirements.txt
 ```
 
