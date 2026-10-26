@@ -57,62 +57,6 @@ After dependency changes, regenerate the deployment requirements:
 uv export --no-dev --no-hashes --no-emit-project --output-file requirements.txt
 ```
 
-## Configure Azure hosting
-
-Create a Linux Azure App Service with Python 3.11 or later and persistent storage.
-Enable its system-assigned managed identity. Assign that identity the Cognitive
-Services User role scoped to your Foundry model resource, with a deployed
-Microsoft-Decision-1 model.
-
-Configure the following App Service application settings. No resource endpoint,
-deployment name, tenant ID, or API key is bundled with this source.
-
-| Setting                              | Value                                                                    |
-|--------------------------------------|--------------------------------------------------------------------------|
-| `PUBLIC_ORIGIN`                       | Exact HTTPS website origin, with no path or trailing slash                |
-| `AZURE_ENDPOINT`                     | Your root HTTPS Foundry resource endpoint                                 |
-| `AZURE_DEPLOYMENT`                   | Your Microsoft-Decision-1 deployment name                                 |
-| `JEV_API_KEY`                        | TypeSafe API key, provided through secure application settings             |
-| `DEMO_DATA_DIR`                      | Persistent SQLite directory; defaults to `/home/intent-demo`               |
-| `SCM_DO_BUILD_DURING_DEPLOYMENT`      | `true`                                                                   |
-| `ENABLE_ORYX_BUILD`                   | `true`                                                                   |
-| `WEBSITES_ENABLE_APP_SERVICE_STORAGE` | `true`                                                                   |
-
-The Jev model is pinned to `jev-1.14.0`. Both providers use server-side
-credentials; the browser never receives an Azure access token or TypeSafe key.
-There is no customer Microsoft sign-in or tenant-ID setting.
-
-The demo opens without a password. `DEMO_PASSWORD_HASH` is no longer used and can
-be removed from existing App Service settings. Anyone who can reach the website
-can submit evaluations against the shared daily quota. Use App Service access
-restrictions if the demo should only be reachable by a limited audience.
-Do not commit keys, environment files, or result databases.
-
-Enable HTTPS-only mode, TLS 1.2 minimum, and Always On. Disable FTPS.
-Use exactly one instance and one worker. Set the startup command to:
-
-```text
-python -m uvicorn web_demo:create_app --factory --host 0.0.0.0 --port 8000 --workers 1 --proxy-headers --forwarded-allow-ips 127.0.0.1
-```
-
-`GET /health` returns `{"status":"ok"}` for requests using the configured host.
-Opening the HTML file directly is not supported; use the hosted website.
-The default application factory requires HTTPS and an Azure managed identity
-environment for live evaluation.
-
-### Troubleshoot cross-site request errors
-
-The homepage supports opening a link from another website in a top-level browser
-tab. Cross-site API requests and embedded pages remain blocked.
-
-If you see `Cross-site requests are not allowed.`, open the website directly in
-your browser rather than inside a preview or iframe. For uploads,
-the browser address must match `PUBLIC_ORIGIN` exactly, including the scheme,
-hostname, and any port. Use one configured origin consistently rather than
-switching between the App Service hostname and a custom domain.
-After deploying application changes or updating `PUBLIC_ORIGIN`, restart the
-App Service and reload the page.
-
 ## Run the demo
 
 1. Open the configured website. No password is required.
