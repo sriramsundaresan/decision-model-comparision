@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Decision Model Comparison</title>
+  <link rel="stylesheet" href="/comparison.css">
+  <script src="/comparison.js" defer></script>
+</head>
+<body>
+  <header><span class="brand">DECISION MODEL COMPARISON</span></header>
+  <main>
+    <h1>Upload and evaluate</h1>
+    <p class="lead">Microsoft-Decision-1 vs Jev</p>
+    <p id="notice" role="status" aria-live="polite"></p>
+    <div id="workspace" hidden>
+      <section class="panel">
+        <div class="section-heading"><a href="/api/template">Download Excel template</a></div>
+        <form id="upload-form">
+          <label for="workbook">Excel workbook (.xlsx)</label>
+          <input id="workbook" type="file" accept=".xlsx" required>
+          <p class="muted">Up to 100 rows | 256 KiB</p>
+          <label class="checkbox"><input id="consent" type="checkbox" required> Synthetic data only. I agree to send it to Microsoft Azure and TypeSafe AI.</label>
+          <button id="evaluate">Evaluate</button>
+        </form>
+        <div id="progress-panel" hidden><progress id="progress" max="100" value="0"></progress><p id="progress-text"></p></div>
+      </section>
+      <section id="results-panel" class="panel" hidden>
+        <div class="section-heading"><h2>Results</h2><span id="run-state" class="badge"></span></div>
+        <p class="muted">Noul is the model's probability that the classifier intent is correct. Values are displayed to two decimals; judgments and accuracy use full precision with a 0.5 boundary.</p>
+        <div class="table-scroll"><table>
+          <thead><tr><th>Evaluator</th><th>Correct</th><th title="Calculated by the app from full-precision judgments and expected labels; not a model output.">Accuracy</th><th title="App-calculated mean squared probability error; lower is better.">Brier</th><th>Median latency (ms)</th><th>Errors</th><th title="Estimated from reported input tokens, not an invoice.">Est. cost (USD)</th></tr></thead>
+          <tbody id="summary-rows"></tbody>
+        </table></div>
+        <div class="table-scroll"><table>
+          <thead><tr><th>Case</th><th>Conversation</th><th>Classifier intent</th><th>Expected intent</th><th>Microsoft-Decision-1 Noul</th><th>Jev Noul</th></tr></thead>
+          <tbody id="result-rows"></tbody>
+        </table></div>
+        <div id="downloads" class="controls" hidden><a id="download-json" class="button secondary">Download JSON</a><a id="download-html" class="button secondary">Download report</a></div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
